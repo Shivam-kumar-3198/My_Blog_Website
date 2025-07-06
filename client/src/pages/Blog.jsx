@@ -67,7 +67,7 @@ const Blog = () => {
             comments.map((comment) => (
               <div key={comment._id} className="mb-4 p-4 border rounded-lg">
                 <p className="font-semibold">{comment.username}</p>
-                <p className="text-gray-600 text-sm">{Moment(comment.date).format("MMMM Do YYYY, h:mm A")}</p>
+                <p className="text-gray-600 text-sm">{Moment(data.createdAt).format("MMMM Do YYYY, h:mm A")}</p>
                 <p className="mt-2">{comment.text}</p>
               </div>
             ))
@@ -78,6 +78,7 @@ const Blog = () => {
       </div>
 
       <div className="pt-10 px-6 md:px-16 max-w-4xl mx-auto text-justify">
+        
         <p className="text-gray-700 leading-7">{data.content}</p>
       </div>
     </div>
