@@ -8,7 +8,8 @@ import {
   FaTwitter,
   FaGooglePlusG,
 } from "react-icons/fa";
-import Footer from "../components/Footer"
+import Footer from "../components/Footer";
+import Loader from "../components/Loader";
 
 const Blog = () => {
   const { id } = useParams();
@@ -18,6 +19,10 @@ const Blog = () => {
   useEffect(() => {
     const fetchBlogData = async () => {
       const blog = blog_data.find((item) => item._id === id);
+
+      // ✅ Simulate delay so Loader is visible
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
       setData(blog);
     };
 
@@ -176,7 +181,7 @@ const Blog = () => {
       <Footer />
     </div>
   ) : (
-    <div className="text-center text-gray-500 py-20">Loading blog post...</div>
+    <Loader />
   );
 };
 
