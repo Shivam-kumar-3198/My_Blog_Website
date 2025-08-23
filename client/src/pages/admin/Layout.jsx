@@ -7,6 +7,11 @@ const Layout = () => {
   const navigate = useNavigate();
 
   const logout = () => {
+    // ✅ Clear auth/session data
+    localStorage.removeItem("authToken"); // or sessionStorage if you stored it there
+    localStorage.removeItem("user"); 
+
+    // ✅ Redirect to homepage (or login page)
     navigate("/");
   };
 

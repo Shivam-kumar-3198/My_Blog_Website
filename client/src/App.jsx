@@ -8,10 +8,13 @@ import Addblog from "./pages/admin/Addblog";
 import ListBlog from "./pages/admin/ListBlog";
 import Comments from "./pages/admin/Comments";
 import Login from "./components/admin/Login";
+import 'quill/dist/quill.snow.css';
 
 const App = () => {
   return (
     <Routes>
+      {/* ✅ Make "/" the homepage */}
+      <Route path="/" element={<Home />} /> 
       <Route path="/home" element={<Home />} />
       <Route path="/blog/:id" element={<Blog />} />
 
