@@ -2,17 +2,20 @@ import React from "react";
 import { assets } from "../../assets/assets";
 import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/admin/Sidebar";
+import { useAppContext } from "../../context/AppContext";
 
 const Layout = () => {
   const navigate = useNavigate();
+  const { setToken } = useAppContext(); // ✅ from context
 
   const logout = () => {
-    // ✅ Clear auth/session data
-    localStorage.removeItem("authToken"); // or sessionStorage if you stored it there
-    localStorage.removeItem("user"); 
+    // ✅ Clear token and user info
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setToken(null); // ✅ update context so ProtectedRoute reacts immediately
 
-    // ✅ Redirect to homepage (or login page)
-    navigate("/");
+    // ✅ Redirect to login
+    navigate("/login");
   };
 
   return (

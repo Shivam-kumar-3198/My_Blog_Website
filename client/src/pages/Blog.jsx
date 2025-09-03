@@ -1,57 +1,69 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { blog_data, assets, comments_data } from "../assets/assets";
+import { assets } from "../assets/assets";
 import Navbar from "../components/Navbar";
 import Moment from "moment";
-import {
-  FaFacebookF,
-  FaTwitter,
-  FaGooglePlusG,
-} from "react-icons/fa";
+import { FaFacebookF, FaTwitter, FaGooglePlusG } from "react-icons/fa";
 import Footer from "../components/Footer";
 import Loader from "../components/Loader";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const Blog = () => {
   const { id } = useParams();
   const [data, setData] = useState(null);
   const [comments, setComments] = useState([]);
+  const [name, setName] = useState("");
+  const [content, setContent] = useState("");
 
+  // Fetch blog + comments
   useEffect(() => {
     const fetchBlogData = async () => {
-      const blog = blog_data.find((item) => item._id === id);
-
-      // ✅ Simulate delay so Loader is visible
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-
-      setData(blog);
+      try {
+        const { data } = await axios.get(`/api/blog/${id}`);
+        data.success ? setData(data.blog) : toast.error(data.message);
+      } catch (error) {
+        toast.error(error.message);
+      }
     };
 
     const fetchComments = async () => {
-      const filteredComments = comments_data.filter(
-        (comment) => comment.blog_id === id
-      );
-      setComments(filteredComments);
+      try {
+        const { data } = await axios.get(`/api/blog/${id}/comments`);
+        if (data.success) setComments(data.comments);
+        else toast.error(data.message);
+      } catch (error) {
+        toast.error(error.message);
+      }
     };
 
     fetchBlogData();
     fetchComments();
   }, [id]);
 
-  const handleSubmit = (e) => {
+  // Add comment
+  const addComment = async (e) => {
     e.preventDefault();
-    const username = e.target.name.value.trim();
-    const text = e.target.comment.value.trim();
-    if (!username || !text) return;
+    try {
+      const { data } = await axios.post(`/api/blog/${id}/comments`, {
+        blog: id, // ✅ include blog ID
+        name,
+        content,
+      });
 
-    const newComment = {
-      _id: Date.now().toString(),
-      username,
-      text,
-      createdAt: new Date().toISOString(),
-      blog_id: id,
-    };
-    setComments((prev) => [newComment, ...prev]);
-    e.target.reset();
+      if (data.success) {
+        toast.success(data.message);
+        if (data.comment) {
+          setComments((prev) => [data.comment, ...prev]);
+        }
+        setName("");
+        setContent("");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    }
   };
 
   return data ? (
@@ -63,6 +75,7 @@ const Blog = () => {
       />
       <Navbar />
 
+      {/* Blog Header */}
       <div className="text-center mt-20 text-gray-600">
         <p className="text-primary py-4 font-medium">
           Published on {Moment(data.createdAt).format("MMMM Do YYYY")}
@@ -80,6 +93,7 @@ const Blog = () => {
         </p>
       </div>
 
+      {/* Blog Content */}
       <div className="mx-5 max-w-5xl md:mx-auto my-10 mt-6">
         <img
           src={data.image}
@@ -95,9 +109,11 @@ const Blog = () => {
 
         {/* Comments Section */}
         <div className="mt-14 mb-10 max-w-3xl mx-auto">
-          <p className="text-xl font-semibold mb-4">Comments ({comments.length})</p>
+          <p className="text-xl font-semibold mb-4">
+            Comments ({comments?.length || 0})
+          </p>
 
-          {comments.length > 0 ? (
+          {comments && comments.length > 0 ? (
             comments.map((comment) => (
               <div
                 key={comment._id}
@@ -105,12 +121,12 @@ const Blog = () => {
               >
                 <div className="flex items-center gap-2 mb-1 text-gray-700 font-semibold">
                   <span className="text-lg">👤</span>
-                  {comment.username}
+                  {comment.name}
                 </div>
                 <p className="text-gray-600 text-sm mb-2">
                   {Moment(comment.createdAt).fromNow()}
                 </p>
-                <p className="text-gray-800">{comment.text}</p>
+                <p className="text-gray-800">{comment.content}</p>
               </div>
             ))
           ) : (
@@ -120,16 +136,18 @@ const Blog = () => {
           {/* Add Comment Form */}
           <div className="mt-10">
             <p className="text-lg font-semibold mb-3">Add your comment</p>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <form onSubmit={addComment} className="flex flex-col gap-3">
               <input
                 type="text"
-                name="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="Name"
                 className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
               <textarea
-                name="comment"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
                 placeholder="Comment"
                 rows="4"
                 className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
@@ -147,7 +165,9 @@ const Blog = () => {
 
         {/* Social Share */}
         <div className="text-center mt-14 mb-10">
-          <p className="text-lg font-semibold mb-4">Share this article on social media</p>
+          <p className="text-lg font-semibold mb-4">
+            Share this article on social media
+          </p>
           <div className="flex justify-center gap-4 text-white">
             <a
               href="https://www.facebook.com/sharer/sharer.php"
@@ -177,7 +197,6 @@ const Blog = () => {
         </div>
       </div>
 
-      {/* Footer */}
       <Footer />
     </div>
   ) : (

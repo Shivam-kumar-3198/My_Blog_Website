@@ -1,31 +1,83 @@
 import React, { useEffect, useRef, useState } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css"; // Import Quill styles
+import { useAppContext } from "../../context/AppContext";
+import toast from "react-hot-toast";
 
 const Addblog = () => {
+  const { axios } = useAppContext();
+  const [isAdding, setIsAdding] = useState(false);
+
   const editorRef = useRef(null);
   const quillRef = useRef(null);
 
   const [image, setImage] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [title, setTitle] = useState("");
   const [subTitle, setSubTitle] = useState("");
   const [category, setCategory] = useState("Startup");
   const [isPublished, setIsPublished] = useState(false);
 
+  // ✅ Placeholder for AI content generation
   const generateContent = async () => {
-    // TODO: Add AI content generation logic here
+    toast("AI content generation not implemented yet.");
   };
 
-  const onSubmiteHandler = async (e) => {
+  // ✅ Submit Handler
+  const onSubmitHandler = async (e) => {
     e.preventDefault();
+    setIsAdding(true);
 
-    const description = quillRef.current
-      ? quillRef.current.root.innerHTML
-      : "";
+    try {
+      const blog = {
+        title,
+        subTitle,
+        description: quillRef.current?.root.innerHTML || "",
+        category,
+        isPublished,
+      };
 
-    console.log({ title, subTitle, category, isPublished, image, description });
+      const formData = new FormData();
+      formData.append("blog", JSON.stringify(blog));
+      formData.append("image", image);
+
+      // ✅ Get JWT token from localStorage
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Unauthorized! Please login again.");
+        setIsAdding(false);
+        return;
+      }
+
+      const { data } = await axios.post("/api/blog/add", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ Send token
+        },
+      });
+
+      if (data.success) {
+        toast.success(data.message || "Blog added successfully!");
+
+        // ✅ Reset form
+        setImage(null);
+        setPreviewUrl(null);
+        setTitle("");
+        setSubTitle("");
+        setCategory("Startup");
+        setIsPublished(false);
+        if (quillRef.current) {
+          quillRef.current.root.innerHTML = "";
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || error.message);
+    } finally {
+      setIsAdding(false);
+    }
   };
 
+  // ✅ Initialize Quill
   useEffect(() => {
     if (!quillRef.current && editorRef.current) {
       quillRef.current = new Quill(editorRef.current, {
@@ -33,12 +85,25 @@ const Addblog = () => {
         placeholder: "Write your blog content here...",
       });
     }
+    return () => {
+      quillRef.current = null; // cleanup
+    };
   }, []);
+
+  // ✅ Preview image & cleanup memory
+  useEffect(() => {
+    if (image) {
+      const objectUrl = URL.createObjectURL(image);
+      setPreviewUrl(objectUrl);
+
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+  }, [image]);
 
   return (
     <div className="min-h-screen bg-blue-50/50 flex justify-center py-10">
       <form
-        onSubmit={onSubmiteHandler}
+        onSubmit={onSubmitHandler}
         className="bg-white w-full max-w-5xl p-6 md:p-10 shadow rounded-lg"
       >
         {/* Upload Thumbnail */}
@@ -47,9 +112,9 @@ const Addblog = () => {
           htmlFor="image"
           className="flex items-center justify-center w-32 h-32 mt-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 transition"
         >
-          {image ? (
+          {previewUrl ? (
             <img
-              src={URL.createObjectURL(image)}
+              src={previewUrl}
               alt="thumbnail"
               className="object-cover w-full h-full rounded-lg"
             />
@@ -93,7 +158,10 @@ const Addblog = () => {
         {/* Blog Description */}
         <p className="mt-4 font-medium text-gray-700">Blog Description</p>
         <div className="w-full mt-2">
-          <div ref={editorRef} className="h-40 border border-gray-300 rounded"></div>
+          <div
+            ref={editorRef}
+            className="h-40 border border-gray-300 rounded"
+          ></div>
           <button
             type="button"
             onClick={generateContent}
@@ -132,10 +200,11 @@ const Addblog = () => {
 
         {/* Submit Button */}
         <button
+          disabled={isAdding}
           type="submit"
           className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
         >
-          Submit Blog
+          {isAdding ? "Adding..." : "Submit Blog"}
         </button>
       </form>
     </div>
