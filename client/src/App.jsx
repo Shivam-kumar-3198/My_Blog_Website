@@ -15,8 +15,15 @@ import { useAppContext } from "./context/AppContext";
 // ✅ ProtectedRoute now uses context internally
 const ProtectedRoute = ({ children }) => {
   const { token } = useAppContext();
-  return token ? children : <Navigate to="/login" replace />;
+
+  if (!token) {
+    // go to Home page instead of Login
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 };
+
 
 const App = () => {
   const { token, loading } = useAppContext();

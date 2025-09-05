@@ -23,16 +23,19 @@ const Footer = () => {
         </div>
 
         {/* Right side: Footer links in columns */}
-        <div className="flex flex-wrap gap-70 justify-end flex-1">
+        <div className="flex flex-wrap gap-x-10 gap-y-10 md:gap-x-20 md:gap-y-10 justify-start md:justify-end flex-1">
           {footer_data.map((section, index) => (
-            <div key={index}>
+            <div key={index} className="w-1/2 sm:w-1/3 md:w-auto">
               <h3 className="font-semibold text-base text-gray-900 mb-2 md:mb-5">
                 {section.title}
               </h3>
               <ul>
                 {section.links.map((link, i) => (
                   <li key={i}>
-                    <a href="#" className="hover:underline transition text-sm text-gray-600">
+                    <a
+                      href="#"
+                      className="hover:underline transition text-sm text-gray-600"
+                    >
                       {link}
                     </a>
                   </li>

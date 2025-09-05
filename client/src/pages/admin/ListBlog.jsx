@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import BlogTablesItems from './BlogTablesItems';
+import BlogTablesItem from '../admin/BlogTablesItems' // ✅ singular import
 import { useAppContext } from '../../context/AppContext';
 import toast from 'react-hot-toast';
 
@@ -8,7 +8,7 @@ const ListBlog = () => {
 
   const fetchBlogs = async () => {
     try {
-      // ✅ Use same endpoint as AppContext (or update if backend has /api/admin/blogs)
+      // ✅ Adjust if your backend has a different admin endpoint
       const { data } = await axios.get('/api/blog/all');
       if (data.success) {
         setBlogs(data.blogs);
@@ -40,17 +40,14 @@ const ListBlog = () => {
             </tr>
           </thead>
           <tbody>
-            {blogs.length > 0 ? (
-              blogs.map((blog, index) => (
-                <BlogTablesItems key={blog._id || index} blog={blog} index={index} />
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="text-center py-6 text-gray-400">
-                  No blogs found
-                </td>
-              </tr>
-            )}
+            {blogs.map((blog, index) => (
+              <BlogTablesItem 
+                key={blog._id} 
+                blog={blog} 
+                index={index + 1} 
+                fetchBlogs={fetchBlogs} 
+              />
+            ))}
           </tbody>
         </table>
       </div>

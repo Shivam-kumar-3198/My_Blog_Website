@@ -5,12 +5,13 @@ import Sidebar from "../../components/admin/Sidebar";
 import { useAppContext } from "../../context/AppContext";
 
 const Layout = () => {
-  const navigate = useNavigate();
-  const { setToken } = useAppContext(); // ✅ from context
+  // const navigate = useNavigate();
+  const { axios, setToken, navigate } = useAppContext(); // ✅ from context
 
   const logout = () => {
     // ✅ Clear token and user info
     localStorage.removeItem("token");
+    axios.defaults.headers.common['Authorization'] = null;
     localStorage.removeItem("user");
     setToken(null); // ✅ update context so ProtectedRoute reacts immediately
 
