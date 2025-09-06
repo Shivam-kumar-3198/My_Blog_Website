@@ -3,7 +3,6 @@ import Quill from "quill";
 import "quill/dist/quill.snow.css";
 import { useAppContext } from "../../context/AppContext";
 import toast from "react-hot-toast";
-import { parse } from "marked";
 
 const Addblog = () => {
   const { axios } = useAppContext();
@@ -21,7 +20,11 @@ const Addblog = () => {
   const [category, setCategory] = useState("Startup");
   const [isPublished, setIsPublished] = useState(false);
 
-  // Initialize Quill editor on component mount
+  // sanitize minimal html (remove script tags). For stronger sanitization, use DOMPurify.
+  const sanitizeHTML = (html = "") =>
+    html.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "");
+
+  // Initialize Quill editor on mount
   useEffect(() => {
     if (editorRef.current && !quillRef.current) {
       quillRef.current = new Quill(editorRef.current, {
@@ -30,28 +33,33 @@ const Addblog = () => {
         modules: {
           toolbar: toolbarRef.current,
         },
+        // <-- FIX: remove "bullet" (not a registered format). Keep "list" only.
         formats: [
           "header",
           "bold",
           "italic",
           "underline",
           "strike",
-          "list",
+          "blockquote",
+          "code-block",
+          "list",    // list is the correct format; it supports values "ordered" and "bullet"
           "link",
-          "clean",
+          "image",
         ],
       });
+
+      // Optionally focus
+      // quillRef.current.focus();
     }
 
     return () => {
-      // Cleanup Quill instance on component unmount
       if (quillRef.current) {
         quillRef.current = null;
       }
     };
   }, []);
 
-  // Handle image selection and create a preview URL
+  // preview image
   useEffect(() => {
     if (!image) {
       setPreviewUrl(null);
@@ -67,29 +75,48 @@ const Addblog = () => {
     setImage(file || null);
   };
 
+  // Generate content using backend AI route (requires auth)
   const generateContent = async () => {
     if (!title) {
       toast.error("Please enter a title to generate content.");
       return;
     }
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please login to use AI content generation.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const { data } = await axios.post("/api/blog/generate", {
-        prompt: title,
-      });
+      const { data } = await axios.post(
+        "/api/blog/ai/generate",
+        { prompt: title, subTitle },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      if (data.success) {
-        quillRef.current.root.innerHTML = parse(data.content);
+      if (data?.success && data.content) {
+        const cleaned = sanitizeHTML(data.content);
+        if (quillRef.current) {
+          quillRef.current.root.innerHTML = cleaned;
+        } else {
+          toast.success("Content generated but editor not initialized.");
+        }
         toast.success("Content generated successfully!");
       } else {
-        toast.error(data.message);
+        toast.error(data?.message || "AI generation failed.");
       }
     } catch (error) {
-      toast.error(
+      const msg =
         error.response?.data?.message ||
-          "Failed to generate content. Please try again."
-      );
+        error.message ||
+        "Failed to generate content. Try again.";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -128,6 +155,7 @@ const Addblog = () => {
       const token = localStorage.getItem("token");
       if (!token) {
         toast.error("Unauthorized! Please login again.");
+        setIsAdding(false);
         return;
       }
 
@@ -137,15 +165,16 @@ const Addblog = () => {
         },
       });
 
-      if (data.success) {
+      if (data?.success) {
         toast.success(data.message || "Blog added successfully!");
         resetForm();
       } else {
-        toast.error(data.message || "Failed to add blog.");
+        toast.error(data?.message || "Failed to add blog.");
       }
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
+          error.message ||
           "An error occurred while adding the blog."
       );
     } finally {
@@ -160,13 +189,16 @@ const Addblog = () => {
         .ql-editor h2 { font-size: 1.3em; margin: 0.75em 0; }
         .ql-editor { line-height: 1.6; }
       `}</style>
+
       <form
         onSubmit={handleFormSubmit}
         className="bg-white w-full max-w-5xl p-6 md:p-10 shadow-lg rounded-lg space-y-6"
       >
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Create a New Blog Post</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">
+          Create a New Blog Post
+        </h2>
 
-        {/* Upload Thumbnail Section */}
+        {/* Upload Thumbnail */}
         <section>
           <p className="font-medium text-gray-700 mb-2">Upload Thumbnail</p>
           <label
@@ -194,7 +226,7 @@ const Addblog = () => {
           </label>
         </section>
 
-        {/* Title and Subtitle Section */}
+        {/* Title & Subtitle */}
         <section>
           <div>
             <p className="font-medium text-gray-700">Blog Title</p>
@@ -219,7 +251,7 @@ const Addblog = () => {
           </div>
         </section>
 
-        {/* Blog Description (Quill Editor) Section */}
+        {/* Quill Editor */}
         <section>
           <p className="font-medium text-gray-700">Blog Description</p>
           <div className="w-full mt-2 border border-gray-300 rounded-lg overflow-hidden">
@@ -255,6 +287,7 @@ const Addblog = () => {
               </span>
               <span className="ql-formats">
                 <button className="ql-link" aria-label="Insert link"></button>
+                <button className="ql-image" aria-label="Insert image"></button>
               </span>
               <span className="ql-formats">
                 <button
@@ -263,11 +296,10 @@ const Addblog = () => {
                 ></button>
               </span>
             </div>
-            <div
-              ref={editorRef}
-              className="h-64 bg-white"
-            ></div>
+
+            <div ref={editorRef} className="h-64 bg-white"></div>
           </div>
+
           <button
             type="button"
             disabled={loading}
@@ -278,7 +310,7 @@ const Addblog = () => {
           </button>
         </section>
 
-        {/* Category & Publish Section */}
+        {/* Category & Publish */}
         <section className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
           <div>
             <p className="font-medium text-gray-700">Category</p>
@@ -293,6 +325,7 @@ const Addblog = () => {
               <option value="Education">Education</option>
             </select>
           </div>
+
           <div className="flex items-center gap-3">
             <input
               type="checkbox"
@@ -307,7 +340,7 @@ const Addblog = () => {
           </div>
         </section>
 
-        {/* Submit Button */}
+        {/* Submit */}
         <div className="pt-4">
           <button
             disabled={isAdding}
