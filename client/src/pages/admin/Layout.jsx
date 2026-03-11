@@ -20,30 +20,39 @@ const Layout = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-[100dvh] bg-gray-50 overflow-hidden font-sans">
+      
       {/* Header */}
-      <div className="flex items-center justify-between py-2 h-[70px] px-4 sm:px-12 border-b border-gray-200">
+      <header className="flex items-center justify-between h-16 sm:h-20 px-4 sm:px-6 lg:px-10 bg-white border-b border-gray-100 shadow-sm shrink-0 z-10">
         <img
           src={assets.logo}
           alt="Logo"
-          className="w-32 sm:w-40 cursor-pointer"
+          className="w-28 sm:w-36 md:w-40 cursor-pointer hover:opacity-80 transition-opacity duration-200 object-contain"
           onClick={() => navigate("/")}
         />
+        
         <button
           onClick={logout}
-          className="text-sm px-8 py-2 bg-primary text-white rounded-full cursor-pointer"
+          className="text-xs sm:text-sm font-medium px-5 sm:px-8 py-2 sm:py-2.5 bg-blue-600 text-white rounded-full cursor-pointer hover:bg-blue-700 hover:shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           Logout
         </button>
-      </div>
+      </header>
 
-      {/* Sidebar + Content */}
-      <div className="flex flex-1 overflow-hidden">
+      {/* Sidebar + Main Content Wrapper */}
+      {/* ✅ FIX APPLIED HERE: Added flex-col md:flex-row */}
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden relative">
+        
+        {/* Sidebar Component */}
         <Sidebar />
-        <div className="flex-1 overflow-auto p-4">
+        
+        {/* Dynamic Page Content */}
+        <main className="flex-1 overflow-y-auto w-full scroll-smooth bg-gray-50">
           <Outlet />
-        </div>
+        </main>
+
       </div>
+      
     </div>
   );
 };

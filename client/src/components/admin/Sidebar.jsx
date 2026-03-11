@@ -4,14 +4,16 @@ import { FaPlus, FaList, FaComments, FaTachometerAlt } from "react-icons/fa";
 
 const Sidebar = () => {
   const linkClasses = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${
+    `flex items-center gap-3 px-4 py-2 rounded-md transition-colors whitespace-nowrap ${
       isActive ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-200"
     }`;
 
   return (
-    <div className="w-64 border-r border-gray-200 p-4 bg-gray-50">
-      <h2 className="text-xl font-semibold mb-6">Admin Panel</h2>
-      <nav className="flex flex-col gap-2">
+    <div className="w-full md:w-64 bg-gray-50 border-b md:border-b-0 md:border-r border-gray-200 p-4 flex flex-col md:min-h-screen sticky top-0 z-20 md:static shadow-sm md:shadow-none">
+      <div className="flex justify-between items-center mb-4 md:mb-6">
+        <h2 className="text-xl font-semibold">Admin Panel</h2>
+      </div>
+      <nav className="flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
         <NavLink to="/admin" end className={linkClasses}>
           <FaTachometerAlt /> Dashboard
         </NavLink>

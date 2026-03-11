@@ -33,8 +33,8 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-50">
-      <div className="w-full max-w-sm p-6 m-4 border border-gray-200 shadow-lg rounded-lg bg-white">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4 py-10">
+      <div className="w-full max-w-sm p-6 border border-gray-200 shadow-lg rounded-lg bg-white">
         <div className="flex flex-col items-center justify-center">
           <div className="w-full py-6 text-center">
             <h1 className="text-3xl font-bold">
@@ -58,7 +58,7 @@ const Login = () => {
                 type="email"
                 required
                 placeholder="your email id"
-                className="border-b-2 border-gray-300 p-2 outline-none mb-6 w-full focus:border-primary"
+                className="border-b-2 border-gray-300 p-2 outline-none mb-6 w-full focus:border-primary text-base"
               />
             </div>
 
@@ -71,7 +71,7 @@ const Login = () => {
                 type="password"
                 required
                 placeholder="your password"
-                className="border-b-2 border-gray-300 p-2 outline-none mb-6 w-full focus:border-primary"
+                className="border-b-2 border-gray-300 p-2 outline-none mb-6 w-full focus:border-primary text-base"
               />
             </div>
 

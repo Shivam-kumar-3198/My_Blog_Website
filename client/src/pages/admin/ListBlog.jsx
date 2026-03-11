@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import BlogTablesItem from '../admin/BlogTablesItems' // ✅ singular import
+import BlogTablesItem from '../admin/BlogTablesItems'; // ✅ singular import
 import { useAppContext } from '../../context/AppContext';
 import toast from 'react-hot-toast';
 
@@ -25,32 +25,45 @@ const ListBlog = () => {
   }, []);
 
   return (
-    <div className="flex-1 pt-5 px-5 sm:pt-12 sm:pl-16 bg-blue-50/50">
-      <h1 className="text-xl font-semibold">All Blogs</h1>
+    <div className="flex-1 w-full min-h-screen p-4 sm:p-6 md:p-10 bg-blue-50/50 box-border overflow-hidden flex flex-col">
+      
+      {/* Page Header */}
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-6 md:mb-8">
+        All Blogs
+      </h1>
 
-      <div className="relative h-4/5 mt-4 max-w-4xl overflow-x-auto shadow rounded-lg scrollbar-hide bg-white">
-        <table className="w-full text-sm text-gray-500">
-          <thead className="text-xs text-gray-600 text-left uppercase">
-            <tr>
-              <th className="px-2 py-4 xl:px-6">#</th>
-              <th className="px-2 py-4">Blog title</th>
-              <th className="px-2 py-4 max-sm:hidden">Date</th>
-              <th className="px-2 py-4 max-sm:hidden">Status</th>
-              <th className="px-2 py-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {blogs.map((blog, index) => (
-              <BlogTablesItem 
-                key={blog._id} 
-                blog={blog} 
-                index={index + 1} 
-                fetchBlogs={fetchBlogs} 
-              />
-            ))}
-          </tbody>
-        </table>
+      {/* Table Container */}
+      <div className="w-full overflow-x-auto bg-white shadow-sm border border-gray-100 rounded-xl scrollbar-hide flex-1">
+        
+        {blogs.length === 0 ? (
+          <div className="flex items-center justify-center h-48 text-gray-500 font-medium">
+            No blogs available.
+          </div>
+        ) : (
+          <table className="w-full text-sm text-left text-gray-600 min-w-[600px] whitespace-nowrap">
+            <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th scope="col" className="px-4 py-4 md:px-6 font-semibold">#</th>
+                <th scope="col" className="px-4 py-4 md:px-6 font-semibold">Blog Title</th>
+                <th scope="col" className="px-4 py-4 md:px-6 font-semibold max-sm:hidden">Date</th>
+                <th scope="col" className="px-4 py-4 md:px-6 font-semibold max-sm:hidden">Status</th>
+                <th scope="col" className="px-4 py-4 md:px-6 font-semibold text-center sm:text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {blogs.map((blog, index) => (
+                <BlogTablesItem 
+                  key={blog._id} 
+                  blog={blog} 
+                  index={index + 1} 
+                  fetchBlogs={fetchBlogs} 
+                />
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
+      
     </div>
   );
 };

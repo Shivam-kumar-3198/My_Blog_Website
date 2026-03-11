@@ -33,7 +33,6 @@ const Addblog = () => {
         modules: {
           toolbar: toolbarRef.current,
         },
-        // <-- FIX: remove "bullet" (not a registered format). Keep "list" only.
         formats: [
           "header",
           "bold",
@@ -47,9 +46,6 @@ const Addblog = () => {
           "image",
         ],
       });
-
-      // Optionally focus
-      // quillRef.current.focus();
     }
 
     return () => {
@@ -183,27 +179,27 @@ const Addblog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-blue-50/50 flex justify-center py-10 px-4">
+    <div className="min-h-screen bg-blue-50/50 flex flex-col items-center py-6 sm:py-10 px-4 sm:px-6 w-full box-border overflow-x-hidden">
       <style>{`
-        .ql-editor h1 { font-size: 1.6em; margin: 0.67em 0; }
-        .ql-editor h2 { font-size: 1.3em; margin: 0.75em 0; }
-        .ql-editor { line-height: 1.6; }
+        .ql-editor h1 { font-size: 1.6em; margin: 0.67em 0; font-weight: bold; }
+        .ql-editor h2 { font-size: 1.3em; margin: 0.75em 0; font-weight: bold; }
+        .ql-editor { line-height: 1.6; font-size: 1rem; }
       `}</style>
 
       <form
         onSubmit={handleFormSubmit}
-        className="bg-white w-full max-w-5xl p-6 md:p-10 shadow-lg rounded-lg space-y-6"
+        className="bg-white w-full max-w-5xl p-5 sm:p-8 md:p-10 shadow-sm border border-gray-100 rounded-xl space-y-6 sm:space-y-8"
       >
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 border-b border-gray-100 pb-4">
           Create a New Blog Post
         </h2>
 
         {/* Upload Thumbnail */}
         <section>
-          <p className="font-medium text-gray-700 mb-2">Upload Thumbnail</p>
+          <p className="font-semibold text-gray-700 mb-2">Upload Thumbnail</p>
           <label
             htmlFor="image"
-            className="flex items-center justify-center w-40 h-40 mt-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 transition-colors"
+            className="flex items-center justify-center w-32 h-32 sm:w-40 sm:h-40 mt-2 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all duration-300"
           >
             {previewUrl ? (
               <img
@@ -212,8 +208,8 @@ const Addblog = () => {
                 className="object-cover w-full h-full rounded-lg"
               />
             ) : (
-              <span className="text-gray-400 text-sm text-center px-2">
-                Click to upload image
+              <span className="text-gray-500 text-sm font-medium text-center px-4">
+                Click to upload
               </span>
             )}
             <input
@@ -227,24 +223,24 @@ const Addblog = () => {
         </section>
 
         {/* Title & Subtitle */}
-        <section>
+        <section className="space-y-4">
           <div>
-            <p className="font-medium text-gray-700">Blog Title</p>
+            <label className="font-semibold text-gray-700 block mb-1">Blog Title</label>
             <input
               type="text"
               placeholder="Enter blog title"
               required
-              className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 transition-shadow"
+              className="w-full p-3 text-sm sm:text-base border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow"
               onChange={(e) => setTitle(e.target.value)}
               value={title}
             />
           </div>
-          <div className="mt-4">
-            <p className="font-medium text-gray-700">Sub Title</p>
+          <div>
+            <label className="font-semibold text-gray-700 block mb-1">Sub Title</label>
             <input
               type="text"
               placeholder="Enter a brief subtitle"
-              className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 transition-shadow"
+              className="w-full p-3 text-sm sm:text-base border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow"
               onChange={(e) => setSubTitle(e.target.value)}
               value={subTitle}
             />
@@ -253,11 +249,22 @@ const Addblog = () => {
 
         {/* Quill Editor */}
         <section>
-          <p className="font-medium text-gray-700">Blog Description</p>
-          <div className="w-full mt-2 border border-gray-300 rounded-lg overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
+             <p className="font-semibold text-gray-700">Blog Description</p>
+             <button
+              type="button"
+              disabled={loading}
+              onClick={generateContent}
+              className="text-xs sm:text-sm text-white bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-700 shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap w-full sm:w-auto"
+            >
+              {loading ? "Generating..." : "✨ Generate with AI"}
+            </button>
+          </div>
+          
+          <div className="w-full border border-gray-300 rounded-lg overflow-hidden flex flex-col focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-shadow">
             <div
               ref={toolbarRef}
-              className="ql-toolbar ql-snow"
+              className="ql-toolbar ql-snow flex flex-wrap items-center gap-1 sm:gap-2 bg-gray-50 border-b border-gray-300 p-2"
               aria-hidden="true"
             >
               <span className="ql-formats">
@@ -297,25 +304,16 @@ const Addblog = () => {
               </span>
             </div>
 
-            <div ref={editorRef} className="h-64 bg-white"></div>
+            <div ref={editorRef} className="min-h-[250px] sm:min-h-[300px] md:min-h-[400px] bg-white"></div>
           </div>
-
-          <button
-            type="button"
-            disabled={loading}
-            onClick={generateContent}
-            className="mt-3 text-sm text-white bg-blue-600 px-4 py-2 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Generating..." : "Generate with AI"}
-          </button>
         </section>
 
         {/* Category & Publish */}
-        <section className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-          <div>
-            <p className="font-medium text-gray-700">Category</p>
+        <section className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+          <div className="w-full sm:w-1/2 md:w-1/3">
+            <label className="font-semibold text-gray-700 block mb-1">Category</label>
             <select
-              className="w-full mt-2 p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full p-3 text-sm sm:text-base border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
@@ -326,28 +324,28 @@ const Addblog = () => {
             </select>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full sm:w-auto p-3 sm:p-0">
             <input
               type="checkbox"
               id="publish"
               checked={isPublished}
               onChange={() => setIsPublished((s) => !s)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
             />
-            <label htmlFor="publish" className="text-gray-700 font-medium">
-              Publish Now
+            <label htmlFor="publish" className="text-gray-800 font-semibold cursor-pointer select-none">
+              Publish Immediately
             </label>
           </div>
         </section>
 
         {/* Submit */}
-        <div className="pt-4">
+        <div className="pt-6 border-t border-gray-100">
           <button
             disabled={isAdding}
             type="submit"
-            className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-blue-600 text-white text-lg font-bold py-3 sm:py-4 rounded-xl hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isAdding ? "Adding Blog..." : "Submit Blog"}
+            {isAdding ? "Adding Blog..." : "Submit Blog Post"}
           </button>
         </div>
       </form>

@@ -43,7 +43,7 @@ const CommentTableItem = ({ comment, fetchComments }) => {
   return (
     <tr className="border-y border-gray-300">
       {/* Blog + Name + Comment */}
-      <td className="px-6 py-4 min-w-[220px] text-sm sm:text-base whitespace-normal break-words">
+      <td className="px-3 sm:px-6 py-4 min-w-[160px] sm:min-w-[220px] text-sm sm:text-base whitespace-normal break-words">
         <div className="mb-2">
           <b className="font-medium text-gray-600">Blog:</b>{" "}
           <span className="block text-gray-800">{blog?.title}</span>
@@ -58,15 +58,19 @@ const CommentTableItem = ({ comment, fetchComments }) => {
           <b className="font-medium text-gray-600">Comment:</b>{" "}
           <span className="block text-gray-800">{content}</span>
         </div>
+
+        <div className="mt-2 text-xs text-gray-500 sm:hidden">
+          {BlogDate.toLocaleDateString()}
+        </div>
       </td>
 
       {/* Date */}
-      <td className="px-6 py-4 max-sm:hidden text-sm text-gray-700">
+      <td className="px-3 sm:px-6 py-4 hidden sm:table-cell text-sm text-gray-700">
         {BlogDate.toLocaleDateString()}
       </td>
 
       {/* Actions */}
-      <td className="px-6 py-4">
+      <td className="px-3 sm:px-6 py-4">
         <div className="flex items-center gap-2">
           {!isApproved ? (
             <img

@@ -11,62 +11,94 @@ const BlogTablesItem = ({ blog, fetchBlogs, index }) => {
 
   // ✅ Delete Blog
   const deleteBlog = async () => {
-  if (!window.confirm("Are you sure you want to delete this blog?")) return;
-  try {
-    const { data } = await axios.delete(`/api/blog/${blog._id}`);
-    if (data.success) {
-      toast.success(data.message);
-      await fetchBlogs();
-    } else {
-      toast.error(data.message);
+    if (!window.confirm("Are you sure you want to delete this blog?")) return;
+    try {
+      const { data } = await axios.delete(`/api/blog/${blog._id}`);
+      if (data.success) {
+        toast.success(data.message);
+        await fetchBlogs();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error deleting blog");
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || "Error deleting blog");
-  }
-};
+  };
 
   // ✅ Toggle Publish
   const togglePublish = async () => {
-  try {
-    const { data } = await axios.patch(`/api/blog/${blog._id}/toggle-publish`);
-    if (data.success) {
-      toast.success(data.message);
-      await fetchBlogs();
-    } else {
-      toast.error(data.message);
+    try {
+      const { data } = await axios.patch(`/api/blog/${blog._id}/toggle-publish`);
+      if (data.success) {
+        toast.success(data.message);
+        await fetchBlogs();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error toggling publish");
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || "Error toggling publish");
-  }
-};
+  };
 
   return (
-    <tr className="border-y border-gray-300">
-      <th className="px-2 py-4">{index}</th>
-      <td className="px-2 py-4">{title}</td>
-      <td className="px-2 py-4 max-sm:hidden">{BlogDate.toDateString()}</td>
+    <tr className="border-b border-gray-50 hover:bg-gray-50/80 transition-colors duration-200">
+      
+      {/* Index */}
+      <td className="px-4 py-4 md:px-6 font-medium text-gray-700">
+        {index}
+      </td>
+      
+      {/* Title */}
+      <td className="px-4 py-4 md:px-6 font-medium text-gray-900 truncate max-w-[150px] sm:max-w-xs">
+        {title}
+      </td>
+      
+      {/* Date */}
+      <td className="px-4 py-4 md:px-6 text-gray-500 max-sm:hidden">
+        {BlogDate.toDateString()}
+      </td>
 
       {/* ✅ Status */}
-      <td className={`px-2 py-4 ${blog.isPublished ? "text-green-600" : "text-orange-700"}`}>
-        {blog.isPublished ? "Published" : "Unpublished"}
+      <td className="px-4 py-4 md:px-6 max-sm:hidden">
+        <span
+          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            blog.isPublished 
+              ? "bg-green-100 text-green-700" 
+              : "bg-orange-100 text-orange-700"
+          }`}
+        >
+          {blog.isPublished ? "Published" : "Unpublished"}
+        </span>
       </td>
 
       {/* ✅ Actions */}
-      <td className="px-2 py-4 flex text-xs gap-3">
-        <button
-          onClick={togglePublish}
-          className="border px-2 py-0.5 mt-1 rounded cursor-pointer"
-        >
-          {blog.isPublished ? "Unpublish" : "Publish"}
-        </button>
+      <td className="px-4 py-4 md:px-6">
+        <div className="flex items-center justify-center gap-2 sm:gap-4">
+          <button
+            onClick={togglePublish}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+              blog.isPublished
+                ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+            }`}
+          >
+            {blog.isPublished ? "Unpublish" : "Publish"}
+          </button>
 
-        <img
-          src={assets.cross_icon}
-          className="w-8 hover:scale-110 transition-all cursor-pointer"
-          alt="delete"
-          onClick={deleteBlog}
-        />
+          <button
+            onClick={deleteBlog}
+            className="p-1.5 rounded-lg hover:bg-red-50 group transition-colors focus:outline-none"
+            title="Delete Blog"
+          >
+            <img
+              src={assets.cross_icon}
+              className="w-5 h-5 sm:w-6 sm:h-6 opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-200 object-contain"
+              alt="delete"
+            />
+          </button>
+        </div>
       </td>
+
     </tr>
   );
 };
